@@ -1,1 +1,2 @@
-# uzbek-chatgpt
+# Uzbek ChatGPT
+
