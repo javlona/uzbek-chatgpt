@@ -69,8 +69,8 @@ def get_chatgpt_response(message):
                       {"role": "user", "content": message}]
         )
         return response.choices[0].message['content']
-    except openai.error.OpenAIError as e:
-        logger.error(f'OpenAI API xatosi: {e}')
+    except openai.Error as e:  # Correctly reference the OpenAI Error
+        logger.error(f'OpenAI API error: {e}')
         return "So'rovni qayta ishlashda qiyinchiliklar mavjud."
     except Exception as e:
         logger.error(f'Kutilmagan xato: {e}')
