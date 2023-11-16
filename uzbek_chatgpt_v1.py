@@ -15,10 +15,16 @@ telegram_token = os.getenv('TELEGRAM_TOKEN')
 # OpenAI API key
 openai.api_key = openai_api_key
 
+system = [{"role": "system", "content": "You are Jbot, a helpful AI assistant."}]
+user = [{"role": "user", "content": "introduce Jbot"}]
+chat = []
+
+
 # Set up logging
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
                     level=logging.INFO)
 logger = logging.getLogger(__name__)
+
 
 # Function to handle /start command
 def start(update, context):
@@ -48,6 +54,29 @@ def capabilities(update, context):
     except Exception as e:
         logger.error(f'Kutilmagan xato: {e}')
 
+def handle_chatgpt_interaction(update, context):
+    user_input = update.message.text
+    while user[0]['content'] != "exit":
+        try:
+            response = openai.ChatCompletion.create(
+                model="gpt-3.5-turbo",  # Specify the model here
+                messages=system + chat[-20:] + user,
+                max_tokens=1000,
+                top_p=0.9
+            )
+        except Exception as err:
+            print(f"Unexpected {err=}, {type(err)=}")
+            raise
+
+    reply = response.choices[0].message['content']
+    print(reply)
+    
+    chat.append({"role": "user", "content": user[0]['content']})
+    chat.append({"role": "assistant", "content": reply})
+    
+    user_input = input("\nPrompt: ")
+    user = [{"role": "user", "content": user_input}]
+
 # Function to handle messages
 def handle_message(update, context):
     try:
@@ -69,7 +98,7 @@ def get_chatgpt_response(message):
                       {"role": "user", "content": message}]
         )
         return response.choices[0].message['content']
-    except openai.Error as e:  # Correctly reference the OpenAI Error
+    except openai.APIError as e:  # Correctly reference the OpenAI Error
         logger.error(f'OpenAI API error: {e}')
         return "So'rovni qayta ishlashda qiyinchiliklar mavjud."
     except Exception as e:
@@ -86,6 +115,7 @@ def main():
     dp.add_handler(CommandHandler("start", start))
     dp.add_handler(CommandHandler("capabilities", capabilities))  # New handler for /capabilities
     dp.add_handler(MessageHandler(Filters.text & ~Filters.command, handle_message))
+    dp.add_handler(MessageHandler(Filters.text & ~Filters.command, handle_chatgpt_interaction))
 
     # Uncomment the following lines if you're using webhooks
     # updater.start_webhook(listen="0.0.0.0",
