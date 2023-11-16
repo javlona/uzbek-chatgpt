@@ -29,6 +29,25 @@ def start(update, context):
     except Exception as e:
         logger.error(f'Kutilmagan xato: {e}')
 
+# Function to handle /capabilities command (ChatGPT nimalar qila oladi?)
+def capabilities(update, context):
+    try:
+        update.message.reply_text(
+            'ChatGPT quyidagi ishlarni bajarishga qodir:\n\n'
+            '1. Turli mavzularda matnli javoblar berish.\n'
+            '2. Yozuvchi va tahrirlovchi sifatida xizmat qilish.\n'
+            '3. Turli tillardagi matnlarni tarjima qilish.\n'
+            '4. Ta\'limiy materiallar yaratish va tushuntirish.\n'
+            '5. Turli maslahat va tavsiyalar berish.\n'
+            '6. Dasturlash bilan bog\'liq maslahatlar berish.\n'
+            '7. O\'yinlar va puzzllar yaratish.\n'
+            '8. Ro\'zg\'or maslahatlari berish.\n\n'
+            'Eslatma: Ba\'zi cheklovlar mavjud.')
+    except TelegramError as e:
+        logger.error(f'Telegram xatosi: {e.message}')
+    except Exception as e:
+        logger.error(f'Kutilmagan xato: {e}')
+
 # Function to handle messages
 def handle_message(update, context):
     try:
@@ -62,7 +81,10 @@ def main():
     # Replace with your actual server details for webhook setup
     updater = Updater(telegram_token, use_context=True)
     dp = updater.dispatcher
+
+    # Register handlers
     dp.add_handler(CommandHandler("start", start))
+    dp.add_handler(CommandHandler("capabilities", capabilities))  # New handler for /capabilities
     dp.add_handler(MessageHandler(Filters.text & ~Filters.command, handle_message))
 
     # Uncomment the following lines if you're using webhooks
